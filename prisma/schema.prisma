@@ -22,21 +22,28 @@ model Post {
   status     PostStatus @default(PUBLISHED)
   tags       String[]
   views      Int        @default(0)
-  authorId   String // better auth
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-  comments   Comment[]
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade) // relation added
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  comments  Comment[]
 
   @@index([authorId])
   @@map("posts")
 }
 
 model Comment {
-  id       String    @id @default(uuid())
-  content  String    @db.Text
-  authorId String // better auth
-  postId   String
-  post     Post      @relation(fields: [postId], references: [id])
+  id      String @id @default(uuid())
+  content String @db.Text
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade) // relation added
+
+  postId String
+  post   Post   @relation(fields: [postId], references: [id])
+
   parentId String?
   parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
   replies  Comment[] @relation("CommentReplies")
@@ -59,4 +66,68 @@ enum PostStatus {
 enum CommentStatus {
   APPROVED
   REJECT
+}
+
+model User {
+  id            String  @id @default(uuid())
+  email         String  @unique
+  name          String?
+  image         String?
+  emailVerified Boolean // এটি যোগ করা হয়েছে
+
+  posts    Post[]
+  comments Comment[]
+  accounts Account[]
+  sessions Session[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Account {
+  id         String @id @default(uuid())
+  accountId  String // Better-Auth এটি প্রয়োজন বোধ করে
+  providerId String // Better-Auth এটি প্রয়োজন বোধ করে
+  userId     String
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  password              String? // পাসওয়ার্ড সেভ করার জন্য এটি অবশ্যই লাগবে
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("accounts")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  expiresAt DateTime
+  token     String   @unique // Better-Auth এটি খুঁজে থাকে
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model Verification {
+  id         String    @id @default(uuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @updatedAt
+
+  @@map("verification")
 }
