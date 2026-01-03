@@ -68,12 +68,22 @@ enum CommentStatus {
   REJECT
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
 model User {
-  id            String  @id @default(uuid())
-  email         String  @unique
-  name          String?
-  image         String?
-  emailVerified Boolean // এটি যোগ করা হয়েছে
+  id    String  @id @default(uuid())
+  email String  @unique
+  name  String?
+  image String?
+
+  emailVerified Boolean @default(false)
+
+  role   UserRole @default(USER)
+  phone  String?
+  status String?  @default("ACTIVE")
 
   posts    Post[]
   comments Comment[]
@@ -104,6 +114,7 @@ model Account {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([userId])
   @@map("accounts")
 }
 
@@ -118,6 +129,7 @@ model Session {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
   @@map("sessions")
 }
 
@@ -129,5 +141,6 @@ model Verification {
   createdAt  DateTime? @default(now())
   updatedAt  DateTime? @updatedAt
 
+  @@index([identifier])
   @@map("verification")
 }
