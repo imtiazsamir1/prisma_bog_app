@@ -15,6 +15,21 @@ const createPost = async (req:Request,res:Response)=>{
         res.status(500).json({message:"Internal server error"})
 }
 }
+
+const getAllPost=async(req:Request,res:Response)=>{
+    try{
+
+        const {search} = req.query
+        const searchString = typeof search === 'string' ? search : undefined;
+        const result = await postService.getAllPost({search: searchString});
+        res.status(200).json(result);
+    }catch(error){
+        res.status(500).json({message:"Internal server error"})
+    }
+}
+
+
 export const postController = {
-    createPost
+    createPost,
+    getAllPost 
 }

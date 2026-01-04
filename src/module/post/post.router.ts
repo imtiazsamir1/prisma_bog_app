@@ -1,3 +1,4 @@
+
 import express, { NextFunction, Request, Response, Router } from "express";
 import { postController } from "./post.controller";
 import auth, { UserRole } from "../../middleware/auth";
@@ -7,6 +8,16 @@ const router = express.Router();
 
 
 // Routes
+
+router.get(
+    "/",
+    postController.getAllPost
+
+)
+
+
+
+
 router.post(
   "/",
   auth(UserRole.ADMIN, UserRole.USER),
