@@ -1,3 +1,4 @@
+import { CommentStatus } from './../../../generated/prisma/enums';
 import { Post, PostStatus, Prisma } from "../../../generated/prisma/client";
 import { prisma } from "../../lib/prisma";
 
@@ -76,6 +77,11 @@ const getAllPost = async ({
       sortBy && sortOrder
         ? { [sortBy]: sortOrder }
         : { createdAt: "desc" },
+        include:{
+          _count:{
+            select:{comments:true}
+          }
+        }
   });
 const total=await prisma.post.count({
     where: {
@@ -97,13 +103,45 @@ const getPostById=async(postId: string)=>{
    await tx.post.update({
     where:{id:postId},
     data:{
-      views:{increment:1}
+      views:{
+        increment:1
+      }
     }
   });
   //to be implemented
-  const postData=await tx.post.findUnique({
-    where:{id:postId}
-  });
+    const postData = await tx.post.findUnique({
+            where: {
+                id: postId
+            },
+            include: {
+                comments: {
+                    where: {
+                        parentId: null,
+                        status: CommentStatus.APPROVED
+                    },
+                    orderBy: { createdAt: "desc" },
+                    include: {
+                        replies: {
+                            where: {
+                                status: CommentStatus.APPROVED
+                            },
+                            orderBy: { createdAt: "asc" },
+                            include: {
+                                replies: {
+                                    where: {
+                                        status: CommentStatus.APPROVED
+                                    },
+                                    orderBy: { createdAt: "asc" }
+                                }
+                            }
+                        }
+                    }
+                },
+                _count: {
+                    select: { comments: true }
+                }
+            }
+        })
   return postData;
   })
 
