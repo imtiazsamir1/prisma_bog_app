@@ -92,8 +92,16 @@ const total=await prisma.post.count({
     }
   };
 };
+const getPostById=async(postId: string)=>{
+  //to be implemented
+  const result=await prisma.post.findUnique({
+    where:{id:postId}
+  });
+  return result;
+  };
 
 export const postService = {
   createPost,
   getAllPost,
+  getPostById
 };

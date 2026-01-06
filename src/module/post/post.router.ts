@@ -15,6 +15,10 @@ router.get(
 
 )
 
+router.get(
+  "/:postId",
+  postController.getPostById
+);
 
 
 
