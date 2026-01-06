@@ -1,50 +1,63 @@
 import { Request, Response } from "express";
 import { postService } from "./post.service";
-import { Post, PostStatus } from "../../../generated/prisma/client";
-const createPost = async (req:Request,res:Response)=>{
-    if(!req.user){
-        return res.status(401).json({message:"Unauthorized"})
+import { PostStatus } from "../../../generated/prisma/client";
+import paginationSortingHelper from "../../helper/paginationSortingHelper";
 
-    }
-    //res.send("Create a new post")
-    // console.log(({req,res}))
-    try{
-        const result = await postService.createPost(req.body,req.user.id );
-        res.status(201).json(result);
-    }catch(error){
-        res.status(500).json({message:"Internal server error"})
-}
-}
+const createPost = async (req: Request, res: Response) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
 
-const getAllPost=async(req:Request,res:Response)=>{
-    try{
+  try {
+    const result = await postService.createPost(req.body, req.user.id);
+    res.status(201).json(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
-        const {search} = req.query
-        const searchString = typeof search === 'string' ? search : undefined;
-        const tags = req.query.tags? (req.query.tags as string).split(',') : [];
+const getAllPost = async (req: Request, res: Response) => {
+  try {
+    const search = typeof req.query.search === "string" ? req.query.search : undefined;
+    const tags = typeof req.query.tags === "string" ? req.query.tags.split(",") : [];
+    const isFeatured =
+      req.query.isFeatured === "true"
+        ? true
+        : req.query.isFeatured === "false"
+        ? false
+        : undefined;
+    const status = req.query.status as PostStatus | undefined;
+    const authorId = req.query.authorId as string | undefined;
+
+    
 
 
-const isFeatured= req.query.isFeatured? req.query.isFeatured==='true'? true: req.query.isFeatured==="false"? false: undefined: undefined;
+        const {page,limit,skip,sortBy,sortOrder}=paginationSortingHelper(req.query);
+        // console.log("options:",options)
 
+    // ✅ PASS explicit undefined for optional props
+    const result = await postService.getAllPost({
+      search,
+      tags,
+      isFeatured,
+      status,
+      authorId,
+      page,
+      limit,
+      skip,
+      sortBy,
+      sortOrder,
+    });
 
-const status= req.query.status as PostStatus | undefined;
-
-const authorId=req.query.authorId as string | undefined;
-
-const page =Number(req.query.page)??1;
-const limit= Number(req.query.limit)??10;
-const skip= (page-1)*limit;
-
-        const result = await postService.getAllPost({search: searchString, tags, isFeatured,status,authorId,page,limit,skip});
-     
-        res.status(200).json(result);
-    }catch(error){
-        res.status(500).json({message:"Internal server error"})
-    }
-}
-
+    res.status(200).json(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 export const postController = {
-    createPost,
-    getAllPost 
-}
+  createPost,
+  getAllPost,
+};
