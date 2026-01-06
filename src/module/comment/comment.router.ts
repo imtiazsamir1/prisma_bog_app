@@ -15,6 +15,11 @@ router.get("/:commentId",
     commentController.getCommentById
 )
 
+router.get("/author/:authorId",
+    //auth(UserRole.USER, UserRole.ADMIN),
+    commentController.getCommentByAuthorId
+)
+
 
 router.post("/",
     auth(UserRole.USER, UserRole.ADMIN),

@@ -46,10 +46,26 @@ const getCommentById =async (id:string) =>{
             }
         }
     })
-}
+};
 
-
-
+const getCommentByAuthorId = async (authorId: string) => {
+   return await prisma.comment.findMany({
+        where:{
+            authorId:authorId   
+},
+orderBy:{
+    createdAt:'desc'},
+include:{   
+            post:{
+                select:{
+                    id:true,
+                    title:true,
+                    views:true
+                }
+            }
+        }
+    })
+};
 
 // 1. nijar comment delete korta parbe
 // login thakte hobe
@@ -61,6 +77,7 @@ const getCommentById =async (id:string) =>{
 
 export const CommentService = {
     createComment,
-    getCommentById
+    getCommentById,
+    getCommentByAuthorId
   
 }
