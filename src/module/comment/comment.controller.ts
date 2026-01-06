@@ -16,6 +16,19 @@ const createComment = async (req: Request, res: Response) => {
     res.status(500).json({ message: "comment creation faild " });
   }
 };
+const getCommentById = async (req: Request, res: Response) => {
+  
+
+  try {
+   const {commentId}= req.params;
+    const result = await CommentService.getCommentById(commentId as string);
+    res.status(200).json(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "comment fatched faild " });
+  }
+};
 export const commentController = {
   createComment,
+  getCommentById
 };

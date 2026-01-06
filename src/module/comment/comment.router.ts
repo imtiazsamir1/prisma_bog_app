@@ -10,6 +10,12 @@ const router = express.Router();
 
 
 // Routes
+router.get("/:commentId",
+    //auth(UserRole.USER, UserRole.ADMIN),
+    commentController.getCommentById
+)
+
+
 router.post("/",
     auth(UserRole.USER, UserRole.ADMIN),
     commentController.createComment
