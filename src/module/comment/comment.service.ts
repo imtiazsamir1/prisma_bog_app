@@ -67,6 +67,29 @@ include:{
     })
 };
 
+
+const deleteComment = async (commentId: string, authorId: string) => {
+    const commentData= await prisma.comment.findFirst({
+        where:{
+            id:commentId,
+            authorId:authorId
+        },
+        select:{
+            id:true
+        }
+    })
+    if(!commentData){
+        throw new Error("You are not authorized to delete this comment");
+    }
+    const result= await prisma.comment.delete({
+        where:{
+            id:commentData.id
+        }
+    })
+    return result;;
+}
+
+
 // 1. nijar comment delete korta parbe
 // login thakte hobe
 // tar nijar comment kina ata check korta hobe
@@ -78,6 +101,7 @@ include:{
 export const CommentService = {
     createComment,
     getCommentById,
-    getCommentByAuthorId
+    getCommentByAuthorId,
+    deleteComment
   
 }

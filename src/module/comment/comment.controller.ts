@@ -42,8 +42,24 @@ const getCommentById = async (req: Request, res: Response) => {
   }
 };
 
+const deleteComment = async (req: Request, res: Response) => {
+  try {
+   
+const user=req.user;
+const {commentId}= req.params;
+    const result = await CommentService.deleteComment(commentId as string, user?.id as string);
+    res.status(200).json(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "comment delete faild " });
+  }
+};
+
+
+
 export const commentController = {
   createComment,
   getCommentById,
-  getCommentByAuthorId
+  getCommentByAuthorId,
+  deleteComment
 };
