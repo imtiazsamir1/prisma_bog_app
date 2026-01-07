@@ -16,6 +16,13 @@ router.get(
 )
 
 router.get(
+    "/my-post",
+    auth(UserRole.ADMIN, UserRole.USER),
+    postController.getMyPost
+
+)
+
+router.get(
   "/:postId",
   postController.getPostById
 );

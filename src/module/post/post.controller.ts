@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { postService } from "./post.service";
 import { PostStatus } from "../../../generated/prisma/client";
 import paginationSortingHelper from "../../helper/paginationSortingHelper";
+import { get } from "node:http";
 
 const createPost = async (req: Request, res: Response) => {
   if (!req.user) {
@@ -16,6 +17,8 @@ const createPost = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+
 
 const getAllPost = async (req: Request, res: Response) => {
   try {
@@ -56,6 +59,8 @@ const getAllPost = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+
 const getPostById = async (req: Request, res: Response) => {
   try {
     const {postId}=req.params;
@@ -72,8 +77,27 @@ const getPostById = async (req: Request, res: Response) => {
   }
 };
 
+const getMyPost = async (req: Request, res: Response) => {
+  try {
+  
+   const user= req.user;
+   if(!user){
+    return res.status(401).json({ message: "Unauthorized" });
+   }
+   console.log(user)
+    const result=await postService.getMyPost(user.id );
+    res.status(200).json(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "post fatched error" });
+  }
+};
+
+
+
 export const postController = {
   createPost,
   getAllPost,
-  getPostById
+  getPostById,
+  getMyPost
 };
