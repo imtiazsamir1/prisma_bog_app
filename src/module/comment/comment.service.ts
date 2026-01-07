@@ -1,3 +1,4 @@
+import { CommentStatus } from './../../../generated/prisma/enums';
 
 import { prisma } from "../../lib/prisma";
 
@@ -97,11 +98,34 @@ const deleteComment = async (commentId: string, authorId: string) => {
 
 // authorId, commentId, updatedData
 
+const updateComment = async (commentId: string, authorId: string, data: { content?: string, status?: CommentStatus }) => {
+    const commentData= await prisma.comment.findFirst({
+        where:{
+            id:commentId,
+            authorId:authorId
+        },
+        select:{
+            id:true
+        }
+    })  
+      if(!commentData){
+        throw new Error("You are not authorized to update this comment");
+    } 
+   return await prisma.comment.update({
+  where: {
+    id: commentData.id
+  },
+  data
+});
+
+           
+}
 
 export const CommentService = {
     createComment,
     getCommentById,
     getCommentByAuthorId,
-    deleteComment
+    deleteComment,
+    updateComment
   
 }
