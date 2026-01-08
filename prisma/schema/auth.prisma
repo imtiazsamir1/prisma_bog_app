@@ -1,0 +1,76 @@
+enum UserRole {
+    USER
+    ADMIN
+}
+
+model User {
+    id    String  @id @default(uuid())
+    email String  @unique
+    name  String?
+    image String?
+
+    emailVerified Boolean @default(false)
+
+    role   UserRole @default(USER)
+    phone  String?
+    status String?  @default("ACTIVE")
+
+    posts    Post[]
+    comments Comment[]
+    accounts Account[]
+    sessions Session[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("users")
+}
+
+model Account {
+    id         String @id @default(uuid())
+    accountId  String // Better-Auth এটি প্রয়োজন বোধ করে
+    providerId String // Better-Auth এটি প্রয়োজন বোধ করে
+    userId     String
+    user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    password              String? // পাসওয়ার্ড সেভ করার জন্য এটি অবশ্যই লাগবে
+    accessToken           String?
+    refreshToken          String?
+    idToken               String?
+    accessTokenExpiresAt  DateTime?
+    refreshTokenExpiresAt DateTime?
+    scope                 String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([userId])
+    @@map("accounts")
+}
+
+model Session {
+    id        String   @id @default(uuid())
+    expiresAt DateTime
+    token     String   @unique // Better-Auth এটি খুঁজে থাকে
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    ipAddress String?
+    userAgent String?
+    userId    String
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
+    @@map("sessions")
+}
+
+model Verification {
+    id         String    @id @default(uuid())
+    identifier String
+    value      String
+    expiresAt  DateTime
+    createdAt  DateTime? @default(now())
+    updatedAt  DateTime? @updatedAt
+
+    @@index([identifier])
+    @@map("verification")
+}
