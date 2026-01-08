@@ -3,6 +3,7 @@ import { postService } from "./post.service";
 import { PostStatus } from "../../../generated/prisma/client";
 import paginationSortingHelper from "../../helper/paginationSortingHelper";
 import { get } from "node:http";
+import { UserRole } from "../../middleware/auth";
 
 const createPost = async (req: Request, res: Response) => {
   if (!req.user) {
@@ -95,9 +96,58 @@ const getMyPost = async (req: Request, res: Response) => {
 
 
 
+
+const updatePost = async (req: Request, res: Response) => {
+  try {
+  
+   const user= req.user;
+   if(!user){
+    return res.status(401).json({ message: "Unauthorized" });
+   }
+   const {postId}=req.params;
+   const isAdmin= user.role===UserRole.ADMIN;
+   console.log(user)
+    const result=await postService.updatePost(postId as string,req.body,user.id,isAdmin );
+    res.status(200).json(result);
+  }  catch (e) {
+        const errorMessage = (e instanceof Error) ? e.message : "post update failed!"
+        res.status(400).json({
+            error: errorMessage,
+            details: e
+        })
+    }
+};
+
+
+
+const deletePost = async (req: Request, res: Response) => {
+  try {
+  
+   const user= req.user;
+   if(!user){
+    return res.status(401).json({ message: "Unauthorized" });
+   }
+   const {postId}=req.params;
+   const isAdmin= user.role===UserRole.ADMIN;
+   console.log(user)
+    const result=await postService.deletePost(postId as string,user.id,isAdmin );
+    res.status(200).json(result);
+  }  catch (e) {
+        const errorMessage = (e instanceof Error) ? e.message : "post delete failed!"
+        res.status(400).json({
+            error: errorMessage,
+            details: e
+        })
+    }
+};
+
+
+
 export const postController = {
   createPost,
   getAllPost,
   getPostById,
-  getMyPost
+  getMyPost,
+  updatePost,
+  deletePost
 };

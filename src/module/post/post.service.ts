@@ -170,7 +170,45 @@ const getPostById=async(postId: string)=>{
     return result
 
     }
+
+//!update own post
+    const updatePost=async (postId:string,data:Partial<Post>,authorId:string,isAdmin:boolean)=>{
+     
+
+      const postData=await prisma.post.findUniqueOrThrow({
+        where:{id:postId},
+        select:{id:true,authorId:true}  
+      })
   
+if(  !isAdmin && (postData.authorId!==authorId)){
+  throw new Error("Unauthorized to update this post")
+}
+if(!isAdmin){
+  delete data.isFeatured
+}
+const result=await prisma.post.update({
+  where:{id:postId},
+  data
+})
+return result;
+    }
+  
+
+
+    const deletePost=async(postId:string,authorId:string,isAdmin:boolean)=>{
+      const postData=await prisma.post.findUniqueOrThrow({
+        where:{id:postId},
+        select:{id:true,authorId:true}  
+      })
+      if(  !isAdmin && (postData.authorId!==authorId)){
+  throw new Error("Unauthorized to delete this post")
+}
+return await prisma.post.delete({
+  where:{id:postId}
+})
+    }
+
+
 
 
 
@@ -178,5 +216,7 @@ export const postService = {
   createPost,
   getAllPost,
   getPostById,
-  getMyPost
+  getMyPost,
+  updatePost,
+  deletePost
 };
