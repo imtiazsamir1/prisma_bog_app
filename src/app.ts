@@ -4,6 +4,8 @@ import { postRouter } from "./module/post/post.router";
 import { auth } from "./lib/auth";
 import cors from "cors";
 import { commentRouter } from "./module/comment/comment.router";
+
+import errorHandler from "./middleware/globalErrorHandler";
 const app: Application = express();
 
 app.use(cors({
@@ -20,8 +22,10 @@ app.all("/api/auth/*splat", toNodeHandler(auth));
 app.use("/posts", postRouter);
 app.use("/comments", commentRouter);
 
+
 app.get("/", (req, res) => {
     res.send("hello world");
 });
+app.use(errorHandler);
 
 export default app;
